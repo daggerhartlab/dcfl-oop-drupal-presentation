@@ -64,6 +64,17 @@
           # Intermediate OOP in Drupal
           ### Patterns, Services, Events, and Dependency Injection
 
+          ## Starts in ~ 5 minutes
+          #### (1pm Eastern US)
+
+        </textarea>
+      </section>
+
+      <section data-markdown>
+        <textarea data-template>
+          # Intermediate OOP in Drupal
+          ### Patterns, Services, Events, and Dependency Injection
+
           Presented by [Jonathan Daggerhart](https://www.drupal.org/u/daggerhart)
           of [Daggerhart Lab](https://daggerhartlab.com/)
         </textarea>
@@ -277,12 +288,16 @@
 
         ```php
         class Pizza {
+
+          // Only this class and its descendents can access this property.
           protected $toppings = [];
 
+          // Any part of the system can run this method.
           public function getToppings() {
             return $this->toppings;
           }
 
+          // Only this class can run this method.
           private function removeAllToppings() {
             $this->toppings = [];
           }
@@ -327,7 +342,7 @@
         ```php
         class PizzaOven {
           // Hint that a Pizza object is the required data type
-          public function cook(Pizza $pizza) {}
+          public function cook(Pizza $any_pizza) {}
         }
         ```
         ```php
@@ -400,7 +415,7 @@
           interface PizzaInterface {}
 
           // Pizza is a PizzaInterface.
-          class Pizza implements PizzaInterface {}
+          class Pizza implements PizzaInterface, AnotherInterface, YetAnother {}
 
           // MustardPizza is a Pizza, and is a PizzaInterface.
           class MustardPizza extends Pizza {}
@@ -523,39 +538,42 @@
 
           #### Nouns
           * Have attributes (state), but don't necessarily "do" anything <br><small>(rocks, pictures, books)</small>
-          * Some perform verbs <br><small>(rabbits Jump, trees Grow, presenters Present)</small>
-          * Sometimes another thing will perform the verb on the noun <br><small>(people Kick rocks, stores Sell books, ovens Cook pizza)</small>
+          * Some perform verbs <br><small>(rabbits <u>Jump</u>, trees <u>Grow</u>, presenters <u>Present</u>)</small>
+          * Sometimes another thing will perform the verb on the noun <br><small>(people <u>Kick</u> rocks, stores <u>Sell</u> books, ovens <u>Cook</u> pizza)</small>
 
           > When designing classes ask yourself,<br>"What is doing the work on what?"
         </textarea>
       </section>
       <section data-markdown>
-        ## Nouns & Verbs - cont...
+        <textarea data-template>
+          ## Nouns & Verbs - cont...
 
-        Verbs don't exist in a vacuum, some noun is likely the performing the work.
+          Verbs don't exist in a vacuum, some noun is likely the performing the work.<br>
+          <small>Consider the follow classes:</small>
 
-        Consider the follow classes:
-
-        ```php
-        class Rock {
-          public $weight = 5;
-          public $color = 'grey'
-        }
-
-        // Catapults launch rocks.
-        class Catapult {
-          public function launch(Rock $rock) {}
-        }
-
-        class Rabbit {
-          // The state of the Rabbit is that it is either jumping or it isn't.
-          protected $isJumping = false;
-
-          public function jump() {
-            $this->isJumping = true;
+          ```php
+          class Rock {
+            public $weight = 5;
+            public $color = 'grey'
           }
-        }
-        ```
+          ```
+          ```php
+          // Catapults launch rocks.
+          class Catapult {
+            public function launch(Rock $rock) {}
+          }
+          ```
+          ```php
+          class Rabbit {
+            // The state of the Rabbit is that it is either jumping or it isn't.
+            protected $isJumping = false;
+
+            public function jump() {
+              $this->isJumping = true;
+            }
+          }
+          ```
+        </textarea>
       </section>
       <section data-markdown>
         <textarea data-template>
@@ -744,7 +762,7 @@
             $price += $topping->getPrice();
           }
 
-          echo "$" . $price; // $12.75
+          echo $price; // 12.75
           ```
         </textarea>
       </section>
@@ -752,7 +770,11 @@
         <textarea data-template>
           ## Composition vs Inheritance
 
-          @todo
+          1. Both are mechanisms for extending functionality of an object
+          1. Too much inheritance creates a rigid system
+          1. Composition is preferred when solving problems outside of the data object's domain
+
+          > More on this with the Decorator pattern
 
         </textarea>
       </section>
@@ -924,7 +946,8 @@
               ]);
             }
           }
-
+          ```
+          ```php
           $cat_pic_api = new CatApiConsumer($creds, $client);
           $random_tabbies = $cat_pic_api->get('/random', [
             'type' => 'tabby',
@@ -947,7 +970,6 @@
               $this->httpClient = $http_client;
             }
 
-            // Now that the endpoint is a parameter we can rename the method to get()
             public function get($endpoint, $query = []) {
               return $this->httpClient->get($endpoint, [
                 'auth' => [
@@ -958,7 +980,8 @@
               ]);
             }
           }
-
+          ```
+          ```php
           $cat_pic_api = new CatApiConsumer($creds, $client);
           $random_tabbies = $cat_pic_api->get('/random', [
             'type' => 'tabby',
@@ -968,7 +991,7 @@
       </section>
       <section data-markdown>
         <textarea data-template>
-          ## Dependency Injection ?
+          ## Dependency Injection
 
           ![DI Tweet](images/dependency-injection-tweet.png)
           <small>https://twitter.com/tenderlove/status/748579020703313920</small>
@@ -1390,6 +1413,7 @@
       <section data-markdown>
         <textarea data-template>
           ## Pattern - Decorator
+          #### Data Objects
 
           Dynamically adding new functionality (behavior) to a class through composition
 
@@ -1406,6 +1430,10 @@
               return $this->product->getPrice() * 1.07;
             }
 
+            public function getProduct() {
+              return $this->product;
+            }
+
           }
           ```
         </textarea>
@@ -1414,7 +1442,7 @@
         <textarea data-template>
           ## Pattern - Decorator
 
-          Allows us to separate the concerns of an object
+          Allows us to separate the concerns of objects
 
           ```php
           class Cat {
@@ -1450,8 +1478,16 @@
           Consider:
 
           * We have a content type (node type) named "Cat"
-          * Since it is a Node, it is already very complicated
+          * Since it is a Node, it is already very complicated through multiple levels of inheritance
+          * A Node instance already has state that may be modified
 
+          ```php
+          function hook_node_view($build, $entity, $display, $view_mode) {
+            $build['cat_picture'] = [
+              '#markup' => // ???
+            ];
+          }
+          ```
           ---
           How should we extend the functionality of a Cat node?
         </textarea>
@@ -1459,12 +1495,13 @@
       <section data-markdown>
         <textarea data-template>
           ## Pattern - Decorator
-          #### In Drupal
+          #### Data Object Decorators in Drupal
 
           With inheritance, we have to re-instantiate all our nodes as "Cat"s
 
           ```php
-          class Node {
+          class Node extends EditorialContentEntityBase implements NodeInterface {
+
             public function __construct($values, $entity_type, $bundle, $translations) {}
           }
           ```
@@ -1478,15 +1515,18 @@
           }
           ```
           ```php
-          // How are we going to get an instance of this node as a Cat?
-          $cat = new Cat();
+          function hook_node_view($build, $entity, $display, $view_mode) {
+            // How are we going to get an instance of this node as a Cat?
+            $build['cat_picture'] = [
+              '#markup' => // ???
+            ];
+          }
           ```
         </textarea>
       </section>
       <section data-markdown>
         <textarea data-template>
           ## Pattern - Decorator
-          #### In Drupal
 
           With a Decorator, we can use existing instances of the node
 
@@ -1507,9 +1547,12 @@
           }
           ```
           ```php
-          $node = // an existing instance of a $node
-          $cat = new CatPictureDecorator( $node );
-          $tabby_picture = $cat->getPicture();
+          function hook_node_view($build, $entity, $display, $view_mode) {
+            $cat = new CatPictureDecorator($entity);
+            $build['cat_picture'] = [
+              '#markup' => "<img src='{$cat->getPicture()}'>",
+            ];
+          }
           ```
         </textarea>
       </section>
@@ -1524,6 +1567,32 @@
           * use existing instances of the object without reloading
 
           [Decorator Pattern](https://designpatternsphp.readthedocs.io/en/latest/Structural/Decorator/README.html)
+        </textarea>
+      </section>
+      <section data-markdown>
+        <textarea data-template>
+          ## Service Decorators
+
+          <strong>Heads up!</strong><br>
+          Symfony provides a mechanism for decorating services
+
+          ```yaml
+          services:
+            # Some service
+            password_generator_unambiguous:
+              class: \Drupal\services_examples\PasswordGeneratorUnambiguous
+
+            # Example service decorator
+            password_generator_unambiguous_decoration:
+              class: \Drupal\services_examples\PasswordGeneratorUnambiguousDecoration
+              public: false
+              decorates: password_generator_unambiguous
+              arguments:
+                - '@password_generator_unambiguous_decoration.inner'
+          ```
+          ---
+          This has different considerations than a simple data object decorator,
+          as it must provide all the functionality that the decorated service offers.
         </textarea>
       </section>
     </section>
@@ -1670,7 +1739,7 @@
       </section>
       <section data-markdown>
         <textarea data-template>
-          ## Cat API - Service Factory
+          ## Cat API - Factory Service
 
           ```php
           namespace Drupal\cat_api\Service;
@@ -1822,6 +1891,8 @@
               arguments:
                 - '@config.factory'
                 - '@entity_type_manager'
+              tags:
+                - { name: 'event_subscriber' }
           ```
 
           ```php
@@ -1915,6 +1986,8 @@
             public function __construct(CatApiClientInterface $cat_api_client) {
               $this->catApiClient = $cat_api_client;
             }
+
+            public function page() {}
 
             public static function create(ContainerInterface $container) {
               return new static(
