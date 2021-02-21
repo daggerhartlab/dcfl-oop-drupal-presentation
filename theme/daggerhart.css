@@ -46,12 +46,12 @@ body {
   color: #fff; }
 
 ::selection {
-  color: #fff;
+  color: #000;
   background: #bee4fd;
   text-shadow: none; }
 
 ::-moz-selection {
-  color: #fff;
+  color: #000;
   background: #bee4fd;
   text-shadow: none; }
 
@@ -181,7 +181,7 @@ body {
 .reveal pre {
   display: block;
   position: relative;
-  width: 90%;
+  width: 98%;
   margin: 20px auto;
   text-align: left;
   font-size: 0.55em;
@@ -204,7 +204,8 @@ body {
   width: 100%;
   word-wrap: normal;
   background: rgba(0, 0, 0, 0.4);
-  font-size: 0.85em;
+  font-size: 0.80em;
+  /*letter-spacing: -1px;*/
   line-height: 1.25;
 }
 

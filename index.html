@@ -64,17 +64,6 @@
           # Intermediate OOP in Drupal
           ### Patterns, Services, Events, and Dependency Injection
 
-          ## Starts in ~ 5 minutes
-          #### (1pm Eastern US)
-
-        </textarea>
-      </section>
-
-      <section data-markdown>
-        <textarea data-template>
-          # Intermediate OOP in Drupal
-          ### Patterns, Services, Events, and Dependency Injection
-
           Presented by [Jonathan Daggerhart](https://www.drupal.org/u/daggerhart)
           of [Daggerhart Lab](https://daggerhartlab.com/)
         </textarea>
@@ -725,7 +714,7 @@
           class Pizza implements PizzaInterface {
 
             private $basePrice = 8.50;
-            private $toppings;
+            private $toppings = [];
 
             public function getBasePrice() {
               return $this->basePrice;
@@ -908,7 +897,7 @@
             private $credentials;
             private $httpClient
 
-            public function __construct($credentials, $http_client) {
+            public function __construct(CredentialsInterface $credentials, HttpClientInterface $http_client) {
               $this->credentials = $credentials;
               $this->httpClient = $http_client;
             }
@@ -936,7 +925,7 @@
             // ...
 
             // Now that the endpoint is a parameter we can rename the method to get()
-            public function get($endpoint, $query = []) {
+            public function get(string $endpoint, array $query = []) {
               return $this->httpClient->get($endpoint, [
                 'auth' => [
                   $this->credentials->getUsername(),
@@ -965,7 +954,7 @@
             private $credentials;
             private $httpClient
 
-            public function __construct($credentials, $http_client) {
+            public function __construct(CredentialsInterface $credentials, HttpClientInterface $http_client) {
               $this->credentials = $credentials;
               $this->httpClient = $http_client;
             }
@@ -1010,12 +999,12 @@
             private $credentials;
             private $httpClient
 
-            public function __construct($credentials, $http_client) {
+            public function __construct(CredentialsInterface $credentials, HttpClientInterface $http_client) {
               $this->credentials = $credentials;
               $this->httpClient = $http_client;
             }
 
-            public function get($endpoint, $query = []) {
+            public function get(string $endpoint, array $query = []) {
               return $this->httpClient->get($endpoint, [
                 'auth' => [
                   $this->credentials->getUsername(),
@@ -1111,7 +1100,7 @@
           ```php
           class CatApiConsumer {
 
-            public function __construct($credentials, $http_client) {
+            public function __construct(CredentialsInterface $credentials, HttpClientInterface $http_client) {
               $this->credentials = $credentials;
               $this->httpClient = $http_client;
             }
@@ -1244,7 +1233,7 @@
 
             private $httpClient;
 
-            public function __construct($http_client) {
+            public function __construct(HttpClientInterface $http_client) {
               $this->httpClient = $http_client;
             }
 
@@ -1267,12 +1256,12 @@
 
             private $httpClient;
 
-            public function __construct($http_client) {
+            public function __construct(HttpClientInterface $http_client) {
               $this->httpClient = $http_client;
             }
 
             // Factory!
-            public static function create($container) {
+            public static function create(ContainerInterface $container) {
               return new static(
                 $container->get('http_client')
               );
@@ -1309,12 +1298,12 @@
 
             private $httpClient;
 
-            public function __construct($http_client) {
+            public function __construct(HttpClientInterface $http_client) {
               $this->httpClient = $http_client;
             }
 
             // Factory!
-            public static function create($container) {
+            public static function create(ContainerInterface $container) {
               return new static(
                 $container->get('http_client')
               );
@@ -1346,11 +1335,11 @@
 
           ```php
           class CatApiConsumer {
-            public function __construct($http_client) {
+            public function __construct(HttpClientInterface $http_client) {
               $this->httpClient = $http_client;
             }
 
-            public static function create($container) {
+            public static function create(ContainerInterface $container) {
               return new static( $container->get('http_client') );
             }
           }
@@ -1399,7 +1388,7 @@
           ```php
           class MyCustomService {
 
-            public function __construct($entity_type_manager, $some_other_service) {}
+            public function __construct(EntityTypeManagerInterface $entity_type_manager, $other_service) {}
 
           }
           ```
@@ -1422,7 +1411,7 @@
 
             private $product;
 
-            public function __construct($product) {
+            public function __construct(ProductInterface $product) {
               $this->product = $product;
             }
 
@@ -1458,7 +1447,7 @@
             private $cat;
             private $catApi;
 
-            public function __construct($cat, $cat_api) {
+            public function __construct(CatInterface $cat, CatApiConsumerInterface $cat_api) {
               $this->cat;
               $this->catApi = $cat_api;
             }
@@ -1548,7 +1537,8 @@
           ```
           ```php
           function hook_node_view($build, $entity, $display, $view_mode) {
-            $cat = new CatPictureDecorator($entity);
+            $cat_api = \Drupal::service('cat_api');
+            $cat = new CatPictureDecorator($entity, $cat_api);
             $build['cat_picture'] = [
               '#markup' => "<img src='{$cat->getPicture()}'>",
             ];
@@ -1562,7 +1552,7 @@
 
           The Decorator pattern allows us to:
 
-          * extend functionality of existing objects
+          * extend functionality of existing objects (in current state)
           * separate the concerns of object functionality
           * use existing instances of the object without reloading
 
