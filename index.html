@@ -79,7 +79,7 @@
           <h3>Jonathan Daggerhart</h3>
 
           <p style="margin-bottom: 50px;">
-            Lead Developer at <a href="https://daggerhartlab.com">Daggerhart Lab</a><br>
+            Architect at <a href="https://daggerhartlab.com">Daggerhart Lab</a><br>
             Organizer of <a href="https://drupalasheville.com">Drupal Camp Asheville</a>
           </p>
 
@@ -127,14 +127,16 @@
         | Term | Definition |
         | ---  | --- |
         | Interface | Template (aka, contract) for a class. Classes "implement" interfaces |
-        | Class     | Template for an object that defines the properties and methods of an object |
+        | Class     | Template for an object that defines the properties (variables and methods (functions) of an object |
         | Object    | An instance of a class |
 
         ```php
         interface PizzaInterface {}
-
+        ```
+        ```php
         class Pizza implements PizzaInterface {}
-
+        ```
+        ```php
         $pizza1 = new Pizza();
         $pizza2 = new Pizza();
         ```
@@ -219,7 +221,7 @@
 
         | Term | Definition |
         | ---  | --- |
-        | Public | Everything can use and modify public properties and methods |
+        | Public | Everything can use and modify public properties and run methods |
         | Private | Restricted access to only methods within the class |
         | Protected | Restricted to the class and its descendents |
       </section>
@@ -265,9 +267,9 @@
         | Concept | Definition |
         | ---  | --- |
         | Data Types | An attribute of data that describes itself to the system <br> <small>Examples: integer, string, float, array, stdClass</small> |
-        | Type Hinting | Defining the required type of data required of a method |
+        | Type Hinting | Defining the type of data required of a method. Any instance of the type of thing is valid |
         | Inheritance | Deriving a new class from another class or interface |
-        | Polymorphism | Any instance of the type of thing is valid |
+        | Polymorphism | A new data type can be made of multiple other data types through inheritance |
         </textarea>
       </section>
       <section data-markdown>
@@ -286,15 +288,15 @@
         }
         ```
         ```php
-        $pizza = new Pizza();
-        var_dump(is_a($pizza, 'Pizza')); // outputs "bool(true)"
+        $my_pizza = new Pizza();
+        var_dump(is_a($my_pizza, 'Pizza')); // outputs "bool(true)"
 
-        $oven = new PizzaOven();
-        var_dump(is_a($oven, 'PizzaOven')); // outputs "bool(true)"
+        $my_oven = new PizzaOven();
+        var_dump(is_a($my_oven, 'PizzaOven')); // outputs "bool(true)"
 
-        $oven->cook($pizza); // Cool
+        $my_oven->cook($my_pizza); // Works.
 
-        $not_a_pizza = 1;
+        $not_a_pizza = 'hello world';
         $oven->cook($not_a_pizza); // Fatal error!
         ```
       </section>
@@ -319,12 +321,12 @@
         }
         ```
         ```php
-        $pizza = new MustardPizza();
-        $pizza->addTopping('cheese');
-        $pizza->addMustard();
+        $my_pizza = new MustardPizza();
+        $my_pizza->addTopping('cheese');
+        $my_pizza->addMustard();
 
-        var_dump(is_a($pizza, 'MustardPizza')); // outputs "bool(true)"
-        var_dump(is_a($pizza, 'Pizza')); // outputs "bool(true)"
+        var_dump(is_a($my_pizza, 'MustardPizza')); // outputs "bool(true)"
+        var_dump(is_a($my_pizza, 'Pizza')); // outputs "bool(true)"
         ```
       </section>
       <section data-markdown>
@@ -347,7 +349,7 @@
       </section>
       <section data-markdown>
         <textarea data-template>
-          ## Polymorphism
+          ## Polymorphism through Inheritance
 
           <small>If a parameter expects a certain type, any object that is an instance of that type can be provided as a valid argument.</small>
 
@@ -460,7 +462,7 @@
         | ---  | --- |
         | Nouns & Verbs | Two ways to think about what a class should and shouldn't do |
         | Dependencies | When objects depend on other parts of the system to operate successfully |
-        | Composition | An approach to building complex objects that encourages flatter data models |
+        | Composition | An approach to building complex objects that encourages flat object architecture (less inheritance) |
       </section>
     </section>
 
@@ -550,23 +552,23 @@
           Objects that hold data and optional exposed some behavior for manipulating or retrieving that data
 
           ```php
-          class Book {
+          class Pizza {
 
-            private $title = 'Big Book of Cat Pictures';
+            public $toppings = [];
 
-            public function getTitle() {
-              return $this->title;
+            public function addTopping($topping) {
+              $this->toppings[] = $topping;
             }
 
           }
           ```
           ```php
-          class Person {
+          class Customer {
 
-            private $bookCollection = [];
+            private $money = 20.00;
 
-            public function addBookToCollection(Book $book) {
-              $this->bookCollection[] = $book;
+            public function spendMoney(float $amount) {
+              $this->money -= $amount;
             }
 
           }
@@ -577,24 +579,30 @@
         <textarea data-template>
           ## <strike>Do-ers</strike> Services
 
-          Service objects either perform a task or return a piece of information.
+          Service objects perform a task or return a piece of information.
 
           > Service objects should have no State
 
           ```php
-          class Library {
+          class PizzaShop {
 
-            public function fetchBook(Book $book) {}
+            public function createPizza(array $toppings) {
+              $pizza = new Pizza();
+              foreach ($toppings as $topping) {
+                $pizza->addTopping($topping);
+              }
+              return $pizza;
+            }
 
-            public function shelveBook(Book $book) {}
-
-            public function buyBook(Book $book, Person $supplier) {}
-
-            public function lendBook(Book $book, Person $customer) {}
-
-            public function sellBook(Book $book, Person $customer) {}
+            public function sellPizza(Pizza $pizza, Customer $customer) {}
 
           }
+
+          $shop = new PizzaShop();
+          $jonathan = new Customer();
+
+          $pizza = $shop->createPizza( ['onions'] );
+          $shop->sellPizza( $pizza, $jonathan );
           ```
         </textarea>
       </section>
@@ -712,7 +720,7 @@
 
           1. Both are mechanisms for extending functionality of an object
           1. Too much inheritance creates a rigid system
-          1. Composition is preferred when solving problems outside of the data object's domain
+          1. Composition is preferred when solving problems outside of the data object's responsibility
 
           > More on this with the Decorator pattern
 
@@ -741,12 +749,14 @@
 
           * Required for a class to work properly
           * Determines the behavior of the class
+          * Property on the class
 
           ---
 
           ### Contextual Dependencies
           * Required for an individual task performed
           * Determines the results of the task
+          * Parameters for a class method
 
         </textarea>
       </section>
@@ -872,8 +882,9 @@
 
           ```php
           class CatApiConsumer {
-
-            // ...
+            // private $credentials;
+            // private $httpClient;
+            // public function __construct() {} ...
 
             // Now that the endpoint is a parameter we can rename the method to get()
             public function get(string $endpoint, array $query = []) {
@@ -1018,7 +1029,7 @@
           ## Pattern - Example
           #### Simple Factory
 
-          Easily create complex objects
+          Service class that creates complex objects
 
           ```php
           class SpecialtyPizzaFactory {
@@ -1049,24 +1060,24 @@
           Static method on a class that creates instances of itself
 
           ```php
-          class CatApiConsumer {
+          class Pizza {
 
-            public function __construct(CredentialsInterface $credentials, HttpClientInterface $http_client) {
-              $this->credentials = $credentials;
-              $this->httpClient = $http_client;
+            // ...
+
+            public static function createVeggie() {
+              $pizza = new static();
+              $pizza->addTopping(new Topping('sauce'));
+              $pizza->addTopping(new Topping('cheese'));
+              $pizza->addTopping(new Topping('green pepper'));
+              $pizza->addTopping(new Topping('onion'));
+              $pizza->addTopping(new Topping('mushroom'));
+              return $pizza;
             }
 
-            public static function create() {
-              return new static(
-                new Credentials('daggerhart', 'abc123'),
-                new HttpClient(['base_url' => 'https://cat-pictures.api'])
-              );
-            }
           }
           ```
           ```php
-          $cat_api = CatApiConsumer::create();
-          $random_cats = $cat_api->get('/random');
+          $veggie_pizza = Pizza::createVeggie();
           ```
         </textarea>
       </section>
@@ -1078,7 +1089,7 @@
           objects fully prepared for use.
 
           ---
-          When creating new classes for Data Objects (Models). consider creating
+          When creating new classes for Data Objects (Models), consider creating
           a Factory for that object. This allows other parts of the system to
           easily create an instance of the class.
 
@@ -1116,7 +1127,8 @@
           $service_locator = new ServiceLocator();
           $service_locator->add('cat_api', new CatApiConsumer());
           $service_locator->add('specialty_pizza_factory', new SpecialtyPizzaFactory());
-          // ...
+
+          // Much later...
           $cat_api = $service_locator->get('cat_api');
           ```
         </textarea>
@@ -1144,6 +1156,7 @@
           \Drupal::entityTypeManager();
           \Drupal::config('my_custom_config');
           \Drupal::service('some_contrib_module_service');
+          \Drupal::service('http_client');
           ```
         </textarea>
       </section>
@@ -1189,7 +1202,8 @@
             }
 
           }
-
+          ```
+          ```php
           $http_client = \Drupal::service('http_client');
           $cat_api = new CatApiConsumer($http_client);
           ```
@@ -1211,7 +1225,7 @@
               $this->httpClient = $http_client;
             }
 
-            // Factory!
+            // Method Factory!
             public static function create(ContainerInterface $container) {
               return new static(
                 $container->get('http_client')
@@ -1253,7 +1267,7 @@
               $this->httpClient = $http_client;
             }
 
-            // Factory!
+            // Method Factory!
             public static function create(ContainerInterface $container) {
               return new static(
                 $container->get('http_client')
@@ -1282,7 +1296,7 @@
           }
           ```
 
-          Use the Dependency Injection Container in Factories.
+          Pass the Dependency Injection Container in Method Factories.
 
           ```php
           class CatApiConsumer {
@@ -1290,6 +1304,7 @@
               $this->httpClient = $http_client;
             }
 
+            // Method Factory!
             public static function create(ContainerInterface $container) {
               return new static( $container->get('http_client') );
             }
@@ -1325,11 +1340,12 @@
           Define your service dependencies as "arguments"
 
           ```yaml
+          # my_module.services.yml
           services:
-            my_service_name:
-              class: \Drupal\my_module\MyCustomService
+            my_module.my_custom_useful_class:
+              class: \Drupal\my_module\MyCustomUsefulClass
               arguments:
-                - '@entity_type_manager'
+                - '@entity_type.manager'
                 - '@some_other_service'
 
           ```
@@ -1337,12 +1353,21 @@
           The container will inject dependencies into the service's constructor
 
           ```php
-          class MyCustomService {
+          // my_module/src/MyCustomUsefulClass.php
+          class MyCustomUsefulClass {
 
             public function __construct(EntityTypeManagerInterface $entity_type_manager, $other_service) {}
 
           }
           ```
+        </textarea>
+      </section>
+      <section data-markdown>
+        <textarea data-template>
+          ## Dependency Injection
+
+          > Questions?
+
         </textarea>
       </section>
     </section>
@@ -1358,20 +1383,20 @@
           Dynamically adding new functionality (behavior) to a class through composition
 
           ```php
-          class TaxedPrice {
+          class TaxedProduct {
 
-            private $product;
+            private $originalProduct;
 
             public function __construct(ProductInterface $product) {
-              $this->product = $product;
+              $this->originalProduct = $product;
             }
 
             public function getTaxedPrice() {
-              return $this->product->getPrice() * 1.07;
+              return $this->originalProduct->getPrice() * 1.07;
             }
 
             public function getProduct() {
-              return $this->product;
+              return $this->originalProduct;
             }
 
           }
@@ -1388,9 +1413,7 @@
           class Cat {
             private $type = 'tabby';
 
-            public function getType() {
-              return $this->type;
-            }
+            public function getType() { return $this->type; }
           }
           ```
           ```php
@@ -1408,6 +1431,10 @@
             }
           }
           ```
+          ```php
+          $cat = new CatPictureDecorator( new Cat(), $cat_api );
+          $cat->getPicture();
+          ```
         </textarea>
       </section>
       <section data-markdown>
@@ -1422,7 +1449,7 @@
           * A Node instance already has state that may be modified
 
           ```php
-          function hook_node_view($build, $entity, $display, $view_mode) {
+          function hook_node_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
             $build['cat_picture'] = [
               '#markup' => // ???
             ];
@@ -1440,8 +1467,8 @@
           With inheritance, we have to re-instantiate all our nodes as "Cat"s
 
           ```php
+          // Node class constructor.
           class Node extends EditorialContentEntityBase implements NodeInterface {
-
             public function __construct($values, $entity_type, $bundle, $translations) {}
           }
           ```
@@ -1455,7 +1482,7 @@
           }
           ```
           ```php
-          function hook_node_view($build, $entity, $display, $view_mode) {
+          function hook_node_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
             // How are we going to get an instance of this node as a Cat?
             $build['cat_picture'] = [
               '#markup' => // ???
@@ -1480,6 +1507,7 @@
               $this->catApi = $cat_api;
             }
 
+            // Returns a url for a cat image.
             public function getPicture() {
               $query = ['type' => $this->node->field_cat_type->value];
               return $this->catApi->get('/random', $query);
@@ -1487,11 +1515,11 @@
           }
           ```
           ```php
-          function hook_node_view($build, $entity, $display, $view_mode) {
+          function hook_node_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
             $cat_api = \Drupal::service('cat_api');
             $cat = new CatPictureDecorator($entity, $cat_api);
             $build['cat_picture'] = [
-              '#markup' => "<img src='{$cat->getPicture()}'>",
+              '#markup' => "<img src='" . $cat->getPicture() . "'>",
             ];
           }
           ```
@@ -1503,9 +1531,9 @@
 
           The Decorator pattern allows us to:
 
-          * extend functionality of existing objects (in current state)
-          * separate the concerns of object functionality
-          * use existing instances of the object without reloading
+          * Extend functionality of existing objects (in current state)
+          * Separate the concerns of object functionality
+          * Use existing instances of the object without reloading
 
           [Decorator Pattern](https://designpatternsphp.readthedocs.io/en/latest/Structural/Decorator/README.html)
         </textarea>
@@ -1794,7 +1822,7 @@
               factory: ['@cat_api.client_factory', 'create']
           ```
           * When someone request the Factory from the container, it has its dependencies injected
-          * When someone request the Client from the container, it is build by the Factory
+          * When someone request the Client from the container, it is built by the Factory
         </textarea>
       </section>
       <section data-markdown>
@@ -1820,7 +1848,7 @@
       </section>
       <section data-markdown>
         <textarea data-template>
-          ## Events - Services
+          ## Detour: Events - Services
 
           Since Symfony events are service classes, we can inject dependencies
           are arguments in our service definition
@@ -1872,6 +1900,39 @@
       </section>
       <section data-markdown>
         <textarea data-template>
+          ## Controller without DI
+
+          Create a page where visitors can look at various types of cats
+
+          ```yaml
+          # cat_api.routing.yml
+          cat_api.browse_cats_page:
+            path: '/browse-cats'
+            defaults:
+              _controller: '\Drupal\cat_api\Controller\BrowseCatsController::page'
+              _title: 'Browse Cats'
+          ```
+          ```php
+          // cat_api/src/Controller/BrowseCatsController.php
+          namespace Drupal\cat_api\Controller;
+
+          class BrowseCatsController {
+
+            // My route's response method (aka "action").
+            public function page() {
+
+              // We don't want to do this, we want dependency injection instead.
+              $cat_api_client = \Drupal::service('cat_api.client');
+
+              // ... Do more work and return a list of cat types.
+              // return $some_response;
+            }
+          }
+          ```
+        </textarea>
+      </section>
+      <section data-markdown>
+        <textarea data-template>
           ## Container Injection Interface
 
           ```php
@@ -1916,25 +1977,26 @@
           cat_api.browse_cats_page:
             path: '/browse-cats'
             defaults:
-              _controller: '\Drupal\cat_api\Controller\BrowseCatsPage::page'
-            # ...
+              _controller: '\Drupal\cat_api\Controller\BrowseCatsController::page'
+              _title: 'Browse Cats'
           ```
           ```php
+          // cat_api/src/Controller/BrowseCatsController.php
           namespace Drupal\cat_api\Controller;
 
-          class BrowseCatsPage implements ContainerInjectionInterface {
+          class BrowseCatsController implements ContainerInjectionInterface {
 
             public function __construct(CatApiClientInterface $cat_api_client) {
               $this->catApiClient = $cat_api_client;
             }
 
-            public function page() {}
-
+            // ContainerInjectionInterface requires I provide this method.
             public static function create(ContainerInterface $container) {
-              return new static(
-                $container->get('cat_api.client')
-              );
+              return new static( $container->get('cat_api.client') );
             }
+
+            // My route's response method (aka "action").
+            public function page() {}
           }
           ```
         </textarea>
